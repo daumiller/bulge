@@ -1,0 +1,13 @@
+{
+  "configurations": [
+      {
+          "name": "MacOS",
+          "includePath": [ "${workspaceFolder}", "/usr/local/include" ],
+          "defines": [],
+          "compilerPath": "/usr/bin/clang",
+          "cStandard": "c99",
+          "intelliSenseMode": "${default}"
+      }
+  ],
+  "version": 4
+}
