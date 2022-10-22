@@ -3,9 +3,9 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "Make test-release",
+			"label": "Make",
 			"command": "/usr/bin/make",
-			"args": [ "test-release" ],
+			"args": [ "" ],
 			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [ "$gcc" ],
 			"group": { "kind": "build", "isDefault": true },
@@ -13,9 +13,19 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "Make test-debug",
+			"label": "Remake",
 			"command": "/usr/bin/make",
-			"args": [ "test-debug" ],
+			"args": [ "remake" ],
+			"options": { "cwd": "${workspaceFolder}" },
+			"problemMatcher": [ "$gcc" ],
+			"group": { "kind": "build", "isDefault": true },
+			"detail": "compiler: /usr/bin/clang"
+		},
+		{
+			"type": "cppbuild",
+			"label": "Make tests-debug",
+			"command": "/usr/bin/make",
+			"args": [ "tests-debug" ],
 			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [ "$gcc" ],
 			"group": { "kind": "build", "isDefault": true },

@@ -27,7 +27,6 @@ typedef struct __attribute__((__packed__)) structBulgeHeader {
 #define BULGE_ENTRY_TYPE_FILE_UPPER      0x5F
 #define BULGE_ENTRY_TYPE_DIRECTORY_LOWER 0x60
 #define BULGE_ENTRY_TYPE_DIRECTORY_UPPER 0x9F
-#define BULGE_ENTRY_TYPE_END             0xFF
 typedef uint8_t BulgeEntryType;
 
 typedef struct __attribute__((__packed__)) structBulgeEntry {

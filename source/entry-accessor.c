@@ -1,5 +1,4 @@
-#include "entry-accessor.h"
-#include "table-accessor.h"
+#include <bulge/bulge.h>
 
 void bulgeEntryAccessor_reset(BulgeEntryAccessor* accessor, uint8_t* block_buffer) {
   accessor->block_directory_current = 0;
@@ -13,17 +12,18 @@ void bulgeEntryAccessor_setDirty(BulgeEntryAccessor* accessor) {
   accessor->dirty = true;
 }
 
-bool bulgeEntryAccessor_flush(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor) {
-  if(filesystem->write(filesystem->block_filesystem + accessor->block_current, accessor->block_buffer, filesystem->callback_data)) {
-    accessor->dirty = false;
-    return true;
+BulgeError bulgeEntryAccessor_flush(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor) {
+  if(filesystem->write(filesystem->block_filesystem + accessor->block_current, accessor->block_buffer, filesystem->callback_data) == false) {
+    return BULGE_ERROR_DEVICE_WRITE;
   }
 
-  return false;
+  accessor->dirty = false;
+  return BULGE_ERROR_NONE;
 }
 
-bool bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor, uint32_t directory_block, uint32_t directory_index, BulgeEntry** entry_pointer) {
+BulgeError bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor, uint32_t directory_block, uint32_t directory_index, BulgeEntry** entry_pointer) {
   bool needs_load = false;
+  BulgeError error;
 
   if(directory_block != accessor->block_directory_current) { needs_load = true; }
   if(directory_index  < accessor->block_entry_index      ) { needs_load = true; }
@@ -32,7 +32,8 @@ bool bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor
   if(needs_load) {
     // if dirty, flush
     if(accessor->dirty) {
-      if(bulgeEntryAccessor_flush(filesystem, accessor) == false) { return false; }
+      error = bulgeEntryAccessor_flush(filesystem, accessor);
+      if(error > BULGE_ERROR_NONE) { return error; }
     }
 
     // first, we need to know how many blocks in this index is
@@ -43,13 +44,16 @@ bool bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor
     BulgeTableAccessor table_accessor;
     bulgeTableAccessor_reset(&table_accessor, accessor->block_buffer);
     for(uint32_t idx=0; idx<block_offset; ++idx) {
-      if(bulgeTableAccessor_getEntry(filesystem, &table_accessor, accessor->block_current, &(accessor->block_current)) == false) { return false; }
+      error = bulgeTableAccessor_getEntry(filesystem, &table_accessor, accessor->block_current, &(accessor->block_current));
+      if(error > BULGE_ERROR_NONE) { return error; }
     }
-    if(accessor->block_current == BULGE_TABLE_FREE ) { return false; } // directory corrupted
-    if(accessor->block_current == BULGE_TABLE_FINAL) { return false; } // index out of bounds
+    if(accessor->block_current == BULGE_TABLE_FREE ) { return BULGE_ERROR_CORRUPTED_DIRECTORY; } // directory corrupted
+    if(accessor->block_current == BULGE_TABLE_FINAL) { return BULGE_ERROR_END_OF_DIRECTORY;    } // index out of bounds
 
     // now we need to read that block into our buffer
-    if(filesystem->read(filesystem->block_filesystem + accessor->block_current, accessor->block_buffer, filesystem->callback_data) == false) { return false; }
+    if(filesystem->read(filesystem->block_filesystem + accessor->block_current, accessor->block_buffer, filesystem->callback_data) == false) {
+      return BULGE_ERROR_DEVICE_READ;
+    }
 
     // and setup the rest of our struct values
     accessor->block_directory_current = directory_block;
@@ -57,5 +61,5 @@ bool bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor
   }
 
   *entry_pointer = &(((BulgeEntry*)(accessor->block_buffer))[directory_index - accessor->block_entry_index]);
-  return true;
+  return BULGE_ERROR_NONE;
 }

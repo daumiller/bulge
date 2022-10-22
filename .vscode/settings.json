@@ -4,5 +4,9 @@
       "**/*.dSYM": true,
       "**/*.img": true,
       "**/*.a": true
+  },
+  "files.associations": {
+    "*.h": "c",
+    "__locale": "c"
   }
 }

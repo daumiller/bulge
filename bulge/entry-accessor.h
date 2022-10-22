@@ -3,8 +3,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "storage-types.h"
-#include "filesystem.h"
+#include <bulge/error.h>
+#include <bulge/storage-types.h>
+#include <bulge/filesystem.h>
 
 // NOTE!!!
 //   BulgeEntryAccessor assumes that you will not modify block_buffer in between alls (unless you reset/flush)
@@ -19,9 +20,9 @@ typedef struct structBulgeEntryAccessor {
   bool     dirty;                   // whether data has been wrote to a getEntry result
 } BulgeEntryAccessor;
 
-void bulgeEntryAccessor_reset(BulgeEntryAccessor* accessor, uint8_t* block_buffer);
+void bulgeEntryAccessor_reset   (BulgeEntryAccessor* accessor, uint8_t* block_buffer);
 void bulgeEntryAccessor_setDirty(BulgeEntryAccessor* accessor);
-bool bulgeEntryAccessor_flush(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor);
-bool bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor, uint32_t directory_block, uint32_t directory_index, BulgeEntry** entry_pointer);
+BulgeError bulgeEntryAccessor_flush   (BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor);
+BulgeError bulgeEntryAccessor_getEntry(BulgeFilesystem* filesystem, BulgeEntryAccessor* accessor, uint32_t directory_block, uint32_t directory_index, BulgeEntry** entry_pointer);
 
 #endif // ifndef BULGE_ENTRY_ACCESSOR_HEADER

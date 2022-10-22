@@ -1,9 +1,5 @@
-#include <stdint.h>
-#include <stdbool.h>
+#include <bulge/bulge.h>
 #include <stdio.h>
-#include "storage-types.h"
-#include "filesystem.h"
-#include "path.h"
 
 #define TEST_FILE_PATH "bulge.img"
 #define TEST_FILE_SIZE (1024*1024)
@@ -69,21 +65,26 @@ int main(int argc, char** argv) {
   zeroTestFile();
 
   BulgeFilesystem fs;
-  if(bulgeFilesystem_create(&fs, 0, 2048, blockRead, blockWrite, NULL, block_buffer) == false) {
-    fprintf(stderr, "bulgeFilesystem_create failed.\n");
+  BulgeError error;
+  error = bulgeFilesystem_create(&fs, 0, 2048, blockRead, blockWrite, NULL, block_buffer);
+  if(error > BULGE_ERROR_NONE) {
+    fprintf(stderr, "bulgeFilesystem_create failed: %s\n", bulgeError_string(error));
     fclose(test_file);
     return -1;
   }
 
   uint8_t uuid[] = { 0x13, 0x37, 0xBA, 0xBE, 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE, 0xF0, 0x0D, 0x11, 0x22, 0x33, 0x44 };
-  if(bulgeFilesystem_setId(&fs, uuid, block_buffer) == false) { fprintf(stderr, "bulgeFilesystem_setId failed.\n"); }
+  error = bulgeFilesystem_setId(&fs, uuid, block_buffer);
+  if(error > BULGE_ERROR_NONE) { fprintf(stderr, "bulgeFilesystem_setId failed: %s\n", bulgeError_string(error)); }
 
   char* name = "Bulge Testing Filesystem";
-  if(bulgeFilesystem_setName(&fs, (uint8_t*)name, block_buffer) == false) { fprintf(stderr, "bulgeFilesystem_setName failed.\n"); }
+  error = bulgeFilesystem_setName(&fs, (uint8_t*)name, block_buffer);
+  if(error > BULGE_ERROR_NONE) { fprintf(stderr, "bulgeFilesystem_setName failed: %s\n", bulgeError_string(error)); }
 
   BulgeFilesystemInformation info;
-  if(bulgeFilesystem_getInformation(&fs, &info, block_buffer) == false) {
-    fprintf(stderr, "bulgeFilesystem_getInformation failed.\n");
+  error = bulgeFilesystem_getInformation(&fs, &info, block_buffer);
+  if(error > BULGE_ERROR_NONE) {
+    fprintf(stderr, "bulgeFilesystem_getInformation failed: %s\n", bulgeError_string(error));
   } else {
     uint64_t bytes_total = ((uint64_t)info.blocks_total) << 9;
     uint64_t bytes_free  = ((uint64_t)info.blocks_free ) << 9;
@@ -106,7 +107,8 @@ int main(int argc, char** argv) {
 
   BulgeEntry* entry = NULL;
   printf("\"/\"\n");
-  if(bulgePath_findEntry(&fs, (uint8_t*)"", block_buffer, &entry) == false) {
+  error = bulgePath_findEntry(&fs, (uint8_t*)"", block_buffer, &entry);
+  if(error > BULGE_ERROR_NONE) {
     printf("  File not found...\n");
   } else {
     dumpEntry(entry);

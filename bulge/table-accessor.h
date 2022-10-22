@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "filesystem.h"
+#include <bulge/error.h>
+#include <bulge/filesystem.h>
 
 // NOTE!!!
 //   BulgeTableAccessor assumes that you will not modify block_buffer in between alls (unless you reset/flush)
@@ -16,9 +17,9 @@ typedef struct structBulgeTableAccessor {
   bool dirty;
 } BulgeTableAccessor;
 
-void bulgeTableAccessor_reset(BulgeTableAccessor* accessor, uint8_t* block_buffer);
-bool bulgeTableAccessor_flush(BulgeFilesystem* filesystem, BulgeTableAccessor* accessor);
-bool bulgeTableAccessor_getEntry(BulgeFilesystem* filesystem, BulgeTableAccessor* accessor, uint32_t table_index, uint32_t* table_value);
-bool bulgeTableAccessor_setEntry(BulgeFilesystem* filesystem, BulgeTableAccessor* accessor, uint32_t table_index, uint32_t table_value);
+void       bulgeTableAccessor_reset   (BulgeTableAccessor* accessor, uint8_t* block_buffer);
+BulgeError bulgeTableAccessor_flush   (BulgeFilesystem* filesystem, BulgeTableAccessor* accessor);
+BulgeError bulgeTableAccessor_getEntry(BulgeFilesystem* filesystem, BulgeTableAccessor* accessor, uint32_t table_index, uint32_t* table_value);
+BulgeError bulgeTableAccessor_setEntry(BulgeFilesystem* filesystem, BulgeTableAccessor* accessor, uint32_t table_index, uint32_t table_value);
 
 #endif // ifndef BULGE_TABLE_ACCESSOR_HEADER

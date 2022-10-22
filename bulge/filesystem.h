@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <bulge/error.h>
 
 typedef bool (*bulgeBlockRead)(uint32_t block, uint8_t* buffer, void* callback_data);
 typedef bool (*bulgeBlockWrite)(uint32_t block, uint8_t* buffer, void* callback_data);
@@ -29,12 +30,12 @@ typedef struct structBulgeFilesystemInformation {
   uint8_t  name[128];    /// name
 } BulgeFilesystemInformation; // 188 Bytes
 
-bool bulgeFilesystem_create(BulgeFilesystem* filesystem, uint32_t block_begin, uint32_t block_count, bulgeBlockRead read, bulgeBlockWrite write, void* callback_data, uint8_t* block_buffer);
-bool bulgeFilesystem_open(BulgeFilesystem* filesystem, uint32_t block, bulgeBlockRead read, bulgeBlockWrite write, void* callback_data, uint8_t* block_buffer);
-bool bulgeFilesystem_close(BulgeFilesystem* filesystem, uint8_t* block_buffer);
-bool bulgeFilesystem_getInformation(BulgeFilesystem* filesystem, BulgeFilesystemInformation* information, uint8_t* block_buffer);
-bool bulgeFilesystem_setId(BulgeFilesystem* filesystem, uint8_t* uuid, uint8_t* block_buffer);
-bool bulgeFilesystem_setName(BulgeFilesystem* filesystem, uint8_t* name, uint8_t* block_buffer);
-bool bulgeFilesystem_setSystemData(BulgeFilesystem* filesystem, uint8_t* system, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_create(BulgeFilesystem* filesystem, uint32_t block_begin, uint32_t block_count, bulgeBlockRead read, bulgeBlockWrite write, void* callback_data, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_open(BulgeFilesystem* filesystem, uint32_t block, bulgeBlockRead read, bulgeBlockWrite write, void* callback_data, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_close(BulgeFilesystem* filesystem, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_getInformation(BulgeFilesystem* filesystem, BulgeFilesystemInformation* information, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_setId(BulgeFilesystem* filesystem, uint8_t* uuid, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_setName(BulgeFilesystem* filesystem, uint8_t* name, uint8_t* block_buffer);
+BulgeError bulgeFilesystem_setSystemData(BulgeFilesystem* filesystem, uint8_t* system, uint8_t* block_buffer);
 
 #endif // ifndef BULGE_FILESYSTEM_HEADER
