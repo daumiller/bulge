@@ -17,10 +17,11 @@ The Bulge Filesystem
     - supports extended attribute data for files/directories
   - support for users/groups/permissions
     - up to the system to enforce; default implementation does not
-  - designed to not require memory allocation
-    - some functions may be heavy on stack use
-    - most functions will require system-provided buffers for I/O
+  - default implementation does not allocate heap memory
+    - most functions require a single 512 byte block for buffering
   - designed for, but not limited to, 68k systems
+    - NOTE: filesystem data stored on disk in big-endian format,
+    - but the default implementation handles conversions for you
 
   **Specifics for 0.1.0.0 default implementation**
 

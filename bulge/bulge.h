@@ -5,6 +5,7 @@
 #include "filesystem.h"
 #include "path.h"
 
+#include "endian.h"
 #include "table-accessor.h"
 #include "entry-accessor.h"
 
