@@ -1,43 +1,42 @@
 Things about the filesystem we NEED to keep track
-  - fs starting block
-  - block occupied/free (for writing at fs_close time)
-  - block read/write functions, and cb data, provided by the system
+  x fs starting block
+  x block occupied/free (for writing at fs_close time)
+  x block read/write functions, and cb data, provided by the system
 Things about the filesystem we SHOULD keep track of
-  - chain table starting block
-  - root directory starting block
-  - system data (so system doesn't require reading/writing header block, if data frequently used)
+  x chain table starting block
+  x root directory starting block
+  x system data (so system doesn't require reading/writing header block, if data frequently used)
 Things the user may want to know about the filesystem
-  - total size, in blocks
-  - free size, in blocks
-  - uuid
-  - name
-  - version
-  - system_data
+  x total size, in blocks
+  x free size, in blocks
+  x uuid
+  x name
+  x version
+  x system_data
 Things the user may want to change about the filesystem
-  - uuid
-  - name
-  - system data
+  x uuid
+  x name
+  x system data
 
 Common Actions about Files/Directories users may want to do (by path)
-  - Create a file/directory
-  - Delete a file/directory
-  - Delete a file/directory's attributes
+  x Create/Delete files and directories
+  - Create/Delete a file/directory's attributes
   - Move a file/directory
-  - Get entry information about a file/directory
-  - Modify entry information about a file/directory
-    - type (within the set of file/directory types)
-    - user/group/permissions
-    - time created/modified
-    - system flags
-    - name
+  x Get entry information about a file/directory
+  x Modify entry information about a file/directory
+    x type (within the set of file/directory types)
+    x user/group/permissions
+    x time created/modified
+    x system flags
+    x name
 
 Actions about directory-data users may want to do
-  - Get handle to a directory by path
-  - List children of a directory
+  x Get handle to a directory by path (via EntryAccessor, could be friendlier though)
+  x List children of a directory
 Things about directory-data we'll keep track of
-  - block for self
-  - block for parent
-  - current entry index (for iteration)
+  x block for self
+  x block for parent
+  x current entry index (for iteration)
 
 Actions about file-data users may want to do
   - get a handle to a file's data, by path

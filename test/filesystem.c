@@ -55,6 +55,45 @@ void dumpEntry(BulgeEntry* entry) {
   printf("            Name : \"%s\"\n", (const char*)(entry->name));
 }
 
+static void dumpDirectory(BulgeFilesystem* fs, uint32_t directory_block, uint32_t indentation, uint8_t* block_buffer) {
+  // list everything in directory
+  BulgeError error;
+  BulgeEntry* entry = NULL;
+  BulgeEntryAccessor entry_accessor;
+  uint32_t entry_index = 0;
+  bulgeEntryAccessor_reset(&entry_accessor, block_buffer);
+  while(true) {
+    error = bulgeEntryAccessor_getEntry(fs, &entry_accessor, directory_block, entry_index, &entry);
+    if(error == BULGE_ERROR_END_OF_DIRECTORY) { break; }
+    if(error != BULGE_ERROR_NONE) {
+      printf("  Error reading directory: %s\n", bulgeError_string(error));
+      break;
+    }
+    ++entry_index;
+
+    bool is_directory = false;
+    if((entry->type >= BULGE_ENTRY_TYPE_FILE_LOWER) && (entry->type <= BULGE_ENTRY_TYPE_FILE_UPPER)) {
+    } else if((entry->type >= BULGE_ENTRY_TYPE_DIRECTORY_LOWER) && (entry->type <= BULGE_ENTRY_TYPE_DIRECTORY_UPPER)) {
+      is_directory = true;
+    } else {
+      continue;
+    }
+
+    for(uint32_t idx=0; idx<indentation; ++idx) { printf(" "); }
+    for(uint8_t idx=0; idx<80; ++idx) {
+      if(entry->name[idx] == 0) { break; }
+      printf("%c", (char)(entry->name[idx]));
+    }
+    if(is_directory) { printf("/"); }
+    printf("\n");
+
+    if(is_directory) {
+      dumpDirectory(fs, BULGE_ENDIAN32(entry->block), indentation+2, block_buffer);
+      bulgeEntryAccessor_reset(&entry_accessor, block_buffer);
+    }
+  }
+}
+
 // in preparation, `dd if=/dev/zero of=./bulge.img bs=1m count=1`
 int main(int argc, char** argv) {
   test_file = fopen(TEST_FILE_PATH, "r+");
@@ -62,7 +101,7 @@ int main(int argc, char** argv) {
     fprintf(stderr, "Error opening test file.\n");
     return -1;
   }
-  zeroTestFile();
+  // zeroTestFile();
 
   BulgeFilesystem fs;
   BulgeError error;
@@ -105,14 +144,51 @@ int main(int argc, char** argv) {
   // printf("\"//\"\n"); bulgePath_openDirectory(&fs, "//", block_buffer, &directory_block);
   // printf("\"/eyo/lego/\"\n"); bulgePath_openDirectory(&fs, "/eyo/lego/", block_buffer, &directory_block);
 
-  BulgeEntry* entry = NULL;
-  printf("\"/\"\n");
-  error = bulgePath_findEntry(&fs, (uint8_t*)"", block_buffer, &entry);
+  // BulgeEntry* entry = NULL;
+  // printf("\"/\"\n");
+  // error = bulgePath_findEntry(&fs, (uint8_t*)"", block_buffer, &entry, 0, 0);
+  // if(error > BULGE_ERROR_NONE) {
+  //   printf("  File not found...\n");
+  // } else {
+  //   dumpEntry(entry);
+  // }
+
+  BulgeEntry create_entry;
+
+  // create a diretory
+  create_entry.type             = BULGE_ENTRY_TYPE_DIRECTORY_LOWER + 3;
+  create_entry.user             = 8;
+  create_entry.group            = 1;
+  create_entry.permissions      = 7;
+  create_entry.time_created[0]  = 0;
+  create_entry.time_created[1]  = 0;
+  create_entry.time_modified[0] = 0;
+  create_entry.time_modified[1] = 0;
+  create_entry.system_flags     = 0x1337;
+  error = bulgePath_createDirectory(&fs, (uint8_t *)"/development", &create_entry, block_buffer);
   if(error > BULGE_ERROR_NONE) {
-    printf("  File not found...\n");
-  } else {
-    dumpEntry(entry);
+    printf("Error creating directory: %s\n", bulgeError_string(error));
   }
+
+  // create a file
+  create_entry.type         = BULGE_ENTRY_TYPE_FILE_LOWER;
+  create_entry.system_flags = 0xBABE;
+  error = bulgePath_createFile(&fs, (uint8_t *)"/boot.script", &create_entry, block_buffer);
+  if(error > BULGE_ERROR_NONE) {
+    printf("Error creating file: %s\n", bulgeError_string(error));
+  }
+
+  // create another file
+  create_entry.type         = BULGE_ENTRY_TYPE_FILE_LOWER;
+  create_entry.system_flags = 0xDEAD;
+  error = bulgePath_createFile(&fs, (uint8_t *)"/development/hello_world.c", &create_entry, block_buffer);
+  if(error > BULGE_ERROR_NONE) {
+    printf("Error creating file: %s\n", bulgeError_string(error));
+  }
+
+  // list filesystem contents
+  printf("/\n");
+  dumpDirectory(&fs, fs.block_root, 2, block_buffer);
 
   bulgeFilesystem_close(&fs, block_buffer);
   fclose(test_file);
