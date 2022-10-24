@@ -45,6 +45,8 @@ BulgeError bulgeUtility_growDirectory(BulgeFilesystem* filesystem, uint8_t direc
   // claim our free block
   error = bulgeTableAccessor_setEntry(filesystem, &table_accessor, block_free, BULGE_TABLE_FINAL);
   if(error > BULGE_ERROR_NONE) { return error; }
+  filesystem->blocks_free -= 1;
+  filesystem->blocks_occupied += 1;
 
   return BULGE_ERROR_NONE;
 }
